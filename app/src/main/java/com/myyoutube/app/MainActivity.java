@@ -2,10 +2,11 @@ package com.myyoutube.app;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.net.Uri;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
@@ -36,17 +37,17 @@ public class MainActivity extends Activity {
         getWindow().setNavigationBarColor(Color.BLACK);
 
         rootLayout = new FrameLayout(this);
-
         webView = new WebView(this);
 
         WebSettings settings = webView.getSettings();
 
+        // تنظیمات مناسب گوشی
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
 
-        settings.setLoadWithOverviewMode(true);
         settings.setUseWideViewPort(true);
+        settings.setLoadWithOverviewMode(true);
 
         settings.setSupportZoom(true);
         settings.setBuiltInZoomControls(true);
@@ -54,12 +55,9 @@ public class MainActivity extends Activity {
 
         settings.setMediaPlaybackRequiresUserGesture(false);
 
-        settings.setUserAgentString(
-            "Mozilla/5.0 (X11; Linux x86_64) " +
-            "AppleWebKit/537.36 (KHTML, like Gecko) " +
-            "Chrome/131.0.0.0 Safari/537.36"
-        );
+        // بدون User-Agent دسکتاپ؛ استفاده از تنظیم پیش‌فرض WebView
 
+        // فعال‌کردن کوکی‌ها
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.setAcceptCookie(true);
         cookieManager.setAcceptThirdPartyCookies(webView, true);
@@ -72,7 +70,16 @@ public class MainActivity extends Activity {
             public boolean shouldOverrideUrlLoading(
                     WebView view,
                     WebResourceRequest request) {
-                return false;
+
+                return handleUrl(request.getUrl());
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(
+                    WebView view,
+                    String url) {
+
+                return handleUrl(Uri.parse(url));
             }
         });
 
@@ -105,10 +112,37 @@ public class MainActivity extends Activity {
         if (savedInstanceState != null) {
             webView.restoreState(savedInstanceState);
         } else {
-            webView.loadUrl("https://www.youtube.com/?app=desktop");
+            webView.loadUrl("https://m.youtube.com/");
         }
     }
 
+    // بازکردن صفحه ورود گوگل در مرورگر خارجی
+    private boolean handleUrl(Uri uri) {
+
+        String host = uri.getHost();
+
+        if (host != null &&
+            (host.equals("accounts.google.com") ||
+             host.equals("consent.google.com"))) {
+
+            try {
+                Intent intent = new Intent(
+                    Intent.ACTION_VIEW,
+                    uri
+                );
+
+                startActivity(intent);
+                return true;
+
+            } catch (Exception e) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    // ورود به حالت تمام‌صفحه
     private void showFullscreen(
             View view,
             WebChromeClient.CustomViewCallback callback) {
@@ -119,7 +153,6 @@ public class MainActivity extends Activity {
         }
 
         isFullscreen = true;
-
         customView = view;
         customViewCallback = callback;
 
@@ -156,6 +189,7 @@ public class MainActivity extends Activity {
         );
     }
 
+    // خروج از حالت تمام‌صفحه
     private void hideFullscreen(boolean notifyCallback) {
 
         if (!isFullscreen) {
@@ -205,6 +239,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+
         if (webView != null) {
             webView.saveState(outState);
         }
@@ -224,4 +259,4 @@ public class MainActivity extends Activity {
 
         super.onDestroy();
     }
-            }
+}
