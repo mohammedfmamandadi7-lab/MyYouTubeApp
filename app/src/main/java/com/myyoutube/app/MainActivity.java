@@ -64,40 +64,33 @@ public class MainActivity extends Activity {
 
         webView.setBackgroundColor(Color.BLACK);
 
-        webView.setWebViewClient(new WebViewClient() {
+webView.setWebChromeClient(new WebChromeClient() {
 
-            @Override
-            public boolean shouldOverrideUrlLoading(
-                    WebView view,
-                    WebResourceRequest request) {
+    @Override
+    public void onShowCustomView(
+            View view,
+            CustomViewCallback callback) {
 
-                return handleUrl(request.getUrl());
-            }
+        showFullscreen(view, callback);
+    }
 
-            @Override
-            public boolean shouldOverrideUrlLoading(
-                    WebView view,
-                    String url) {
+    @Override
+    public void onShowCustomView(
+            View view,
+            int requestedOrientation,
+            CustomViewCallback callback) {
 
-                return handleUrl(Uri.parse(url));
-            }
-        });
+        showFullscreen(view, callback);
+    }
 
-        webView.setWebChromeClient(new WebChromeClient() {
+    @Override
+    public void onHideCustomView() {
+        hideFullscreen(false);
+    }
+});
 
-            @Override
-            public void onShowCustomView(
-                    View view,
-                    CustomViewCallback callback) {
+            
 
-                showFullscreen(view, callback);
-            }
-
-            @Override
-            public void onHideCustomView() {
-                hideFullscreen(false);
-            }
-        });
 
         rootLayout.addView(
             webView,
