@@ -11,12 +11,11 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        CustomTabsIntent customTabsIntent =
-                new CustomTabsIntent.Builder()
-                        .setShowTitle(true)
-                        .build();
+        CustomTabsIntent intent = new CustomTabsIntent.Builder()
+                .setShowTitle(true)
+                .build();
 
-        customTabsIntent.launchUrl(
+        intent.launchUrl(
                 this,
                 Uri.parse("https://m.youtube.com/")
         );
